@@ -111,7 +111,6 @@ def call_openai_chatbot(user_text):
         ]
     )
     return response["choices"][0]["message"]["content"]
-output_text
 
 def call_openai_vision_ai(score, total, weak_areas):
     prompt = f"""
@@ -714,6 +713,7 @@ def api_upload():
 # -------------------- Run --------------------
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
