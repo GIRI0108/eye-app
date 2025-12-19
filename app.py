@@ -10,7 +10,7 @@ from reportlab.lib.pagesizes import letter
 from PIL import Image
 from dotenv import load_dotenv
 from bson import ObjectId
-from openai import OpenAI
+import openai
 import pandas as pd
 import random
 import json
@@ -19,7 +19,9 @@ import json
 # Load env
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+openai.api_key = OPENAI_API_KEY
+
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/")
 SECRET_KEY = os.getenv("SECRET_KEY", "change_this_in_prod")
 
 # OpenAI client
@@ -59,112 +61,78 @@ def save_file_storage(fs):
 
 # -------------------- AI FUNCTIONS --------------------
 def call_openai_image_analysis_localfile(image_path):
-    import base64
-
-    with open(image_path, "rb") as img_file:
-        img_bytes = img_file.read()
-        b64_img = base64.b64encode(img_bytes).decode("utf-8")
+    with open(image_path, "rb") as f:
+        b64_img = base64.b64encode(f.read()).decode()
 
     prompt = """
-    You are a professional eye specialist doctor.
+You are a professional eye specialist doctor.
 
-    Analyze this eye image and provide FULL medical report in:
+Analyze this eye image and provide FULL medical report in:
+1. English
+2. Tamil
 
-    1. English
-    2. Tamil
+Include:
+- Disease name (if any)
+- Symptoms
+- Causes
+- What to do ✅
+- What NOT to do ❌
+- Health tips
+- Risk level
+"""
 
-    Must include:
-    - Disease Name if avaliable
-    or any abnormalities found.
-    like eye is very red or dry etc.
-    if none found, say "No issues found".
-    - Symptoms
-    - Causes (How it happens)
-    - What to do ✅
-    - What NOT to do ❌
-    - Health tips
-    - Risk level
-    Provide the response in structured format with headings with small content.with bullet points where necessary.
-if not patter
-    """
-
-    response = client.responses.create(
-        model="gpt-4.1-mini",
-        input=[
+    response = openai.ChatCompletion.create(
+        model="gpt-4o-mini",
+        messages=[
             {
                 "role": "user",
                 "content": [
-                    {"type": "input_text", "text": prompt},
+                    {"type": "text", "text": prompt},
                     {
-                        "type": "input_image",
-                        "image_url": f"data:image/jpeg;base64,{b64_img}"
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{b64_img}"
+                        }
                     }
                 ]
             }
         ]
     )
 
-    return {"model_response": response.output_text}
+    return {
+        "model_response": response["choices"][0]["message"]["content"]
+    }
+
 
 
 def call_openai_chatbot(user_text):
-    prompt = f"""
-    You are a medical eye specialist assistant.
-
-    Answer in BOTH English and Tamil.
-
-    Include:
-    - Explanation
-    - Symptoms
-    - Causes
-    - What to do ✅
-    - What NOT to do ❌
-    - Health tips
-
-    Question:
-    {user_text}
-    """
-
-    resp = client.responses.create(
-        model="gpt-4.1-mini",
-        input=prompt
+    response = openai.ChatCompletion.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are an eye specialist"},
+            {"role": "user", "content": user_text}
+        ]
     )
-    return resp.output_text
+    return response["choices"][0]["message"]["content"]
+output_text
 
 def call_openai_vision_ai(score, total, weak_areas):
     prompt = f"""
-You are a senior ophthalmologist.
-
-A user completed a vision activity test.
-
-Score: {score} / {total}
+Vision Test Report:
+Score: {score}/{total}
 Weak areas: {", ".join(weak_areas)}
-
-Generate a PROFESSIONAL vision risk report.
-
-Include:
-1. Risk Level (Low / Moderate / High)
-2. What happened
-3. Why it happened
-4. What may happen if ignored
-5. How to improve
-6. What to avoid
-7. Eye care tips
-
-Language:
-- English
-- Tamil
-
-Rules:
-- Not a medical diagnosis
-- Friendly professional tone
+Give risk analysis and advice in English & Tamil.
 """
 
-    resp = client.responses.create(
-        model="gpt-4.1-mini",
-        input=prompt
+    response = openai.ChatCompletion.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
     )
-    return resp.output_text
+
+    return response["choices"][0]["message"]["content"]
+
 
 # ---- Quiz helpers ----
 def load_questions_from_excel(excel_path="static/games/vision_questions_40.xlsx"):
@@ -749,3 +717,4 @@ def api_upload():
 # -------------------- Run --------------------
 if __name__ == "__main__":
     app.run(debug=True)
+
