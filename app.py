@@ -21,7 +21,7 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai.api_key = OPENAI_API_KEY
 
-MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/")
+MONGO_URI = os.getenv("MONGO_URL", "mongodb://localhost:27017/")
 SECRET_KEY = os.getenv("SECRET_KEY", "change_this_in_prod")
 
 # Flask app
@@ -714,5 +714,6 @@ def api_upload():
 # -------------------- Run --------------------
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
