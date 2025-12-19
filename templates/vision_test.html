@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.test-box { 
+    padding: 20px; 
+    margin: 20px 0; 
+    border-radius: 10px; 
+    background: #f0f7ff; 
+    border: 1px solid #cce0ff;
+}
+#movingTarget {
+    width: 40px; height: 40px; background: red;
+    border-radius: 50%; position: absolute;
+    cursor: pointer; display: none;
+}
+.hidden { display:none; }
+</style>
+
+<h2>Real-Life Vision Activity Test</h2>
+<form method="post" id="visionForm">
+
+<!-- 1. Moving Object Tracking -->
+<div class="test-box">
+  <h3>1. Moving Object Tracking</h3>
+  <p>Try clicking the moving red circle as fast as possible.</p>
+  <button type="button" onclick="startMovingTest()">Start</button>
+  <p>Clicks Captured: <span id="clickCount">0</span></p>
+  <div id="movingTarget"></div>
+  <input type="hidden" name="track_clicks" id="track_clicks">
+</div>
+
+<!-- 2. Focus Change -->
+<div class="test-box">
+  <h3>2. Focus Change Test</h3>
+  <p>Press the button when the text switches size.</p>
+  <h1 id="focusWord">NEAR</h1>
+  <button type="button" onclick="recordFocus()">I detected change</button>
+  <input type="hidden" name="focus_detected" id="focus_detected">
+</div>
+
+<!-- 3. Shape Memory -->
+<div class="test-box">
+  <h3>3. Shape Memory Test</h3>
+  <p>A shape will flash briefly. Remember it.</p>
+  <button type="button" onclick="flashShape()">Start</button>
+  <div id="shapeBox" style="font-size:40px; display:none;"></div>
+  <input name="shape_answer" placeholder="What shape was shown?">
+</div>
+
+<!-- 4. Peripheral Detection -->
+<div class="test-box">
+  <h3>4. Peripheral Vision</h3>
+  <p>Press SPACE when a dot flashes on the side.</p>
+  <div id="periphDot" style="width:20px;height:20px;background:green;position:absolute;display:none;"></div>
+  <input type="hidden" name="peripheral_reaction" id="peripheral_reaction">
+</div>
+
+<!-- 5. Color Distinguish -->
+<div class="test-box">
+  <h3>5. Color Sensitivity</h3>
+  <p>Select which color looks darker.</p>
+  <div style="display:flex;gap:20px;">
+    <div style="width:80px;height:80px;background:#88c0ff;"></div>
+    <div style="width:80px;height:80px;background:#6aa8ff;"></div>
+  </div>
+  <select name="color_choice">
+    <option value="left">Left</option>
+    <option value="right">Right</option>
+  </select>
+</div>
+
+<!-- 6. Brightness Flash -->
+<div class="test-box">
+  <h3>6. Brightness Sensitivity</h3>
+  <button type="button" onclick="flashScreen()">Flash</button>
+  <select name="brightness_level">
+    <option value="normal">Normal</option>
+    <option value="bright">Too Bright</option>
+    <option value="painful">Painful</option>
+  </select>
+</div>
+
+<!-- 7. Contrast Reading -->
+<div class="test-box">
+  <h3>7. Contrast Reading</h3>
+  <p style="opacity:0.35;">Read this low contrast text: ABCD1234</p>
+  <input name="contrast_read" placeholder="Enter what you saw">
+</div>
+
+<!-- 8. Astigmatism (Line Activity) -->
+<div class="test-box">
+  <h3>8. Astigmatism Line Test</h3>
+  <p>Do any lines look darker?</p>
+  <div>
+    <hr>
+    <hr style="opacity:0.8;">
+    <hr style="opacity:0.6;">
+    <hr style="opacity:0.9;">
+  </div>
+  <select name="line_issue">
+    <option value="no">No</option>
+    <option value="yes">Yes, some darker</option>
+  </select>
+</div>
+
+<!-- 9. Depth Perception -->
+<div class="test-box">
+  <h3>9. Depth Perception</h3>
+  <p>Which circle looks closer?</p>
+  <div style="display:flex;gap:40px;">
+    <div style="width:60px;height:60px;border-radius:50%;background:blue;box-shadow:5px 5px 20px #0003;"></div>
+    <div style="width:60px;height:60px;border-radius:50%;background:blue;transform:scale(1.1);"></div>
+  </div>
+  <select name="depth_choice">
+    <option value="left">Left</option>
+    <option value="right">Right</option>
+  </select>
+</div>
+
+<!-- 10. Coordination Game -->
+<div class="test-box">
+  <h3>10. Eye-Hand Coordination</h3>
+  <p>Catch the falling ball!</p>
+  <button type="button" onclick="startCatchGame()">Start</button>
+  <input type="hidden" name="catch_success" id="catch_success">
+</div>
+
+<button class="btn">Submit Test</button>
+
+</form>
+
+<script>
+let clicks = 0;
+function startMovingTest() {
+    let target = document.getElementById("movingTarget");
+    target.style.display = "block";
+    setInterval(() => {
+        target.style.left = Math.random()*300 + "px";
+        target.style.top = Math.random()*200 + "px";
+    }, 600);
+    target.onclick = () => {
+        clicks++;
+        document.getElementById("clickCount").innerText = clicks;
+        document.getElementById("track_clicks").value = clicks;
+    };
+}
+
+function recordFocus() {
+    document.getElementById("focus_detected").value = "yes";
+}
+
+function flashShape() {
+    const shapes = ["▲","■","●"];
+    let s = shapes[Math.floor(Math.random()*3)];
+    let box = document.getElementById("shapeBox");
+    box.innerText = s;
+    box.style.display="block";
+    setTimeout(()=> box.style.display="none", 1000);
+}
+
+function flashScreen() {
+    document.body.style.background = "white";
+    setTimeout(()=> document.body.style.background = "", 200);
+}
+
+// Peripheral vision
+document.addEventListener("keydown",(e)=>{
+    if(e.code==="Space"){
+        document.getElementById("peripheral_reaction").value = "detected";
+    }
+});
+
+function startCatchGame(){
+    document.getElementById("catch_success").value = "played";
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card" style="max-width:700px;margin:auto;">
+  <h2>Edit Profile</h2>
+
+  <form method="POST">
+
+    <input name="full_name" placeholder="Full Name" required>
+    <input name="age" type="number" placeholder="Age" required>
+
+    <select name="gender">
+      <option>Male</option>
+      <option>Female</option>
+      <option>Other</option>
+    </select>
+
+    <input name="phone" placeholder="Phone Number" required>
+    <input name="email" placeholder="Email">
+
+    <input name="height" placeholder="Height (cm)">
+    <input name="weight" placeholder="Weight (kg)">
+
+    <input name="bp_systolic" placeholder="Blood Pressure - Upper (eg: 120)" required>
+    <input name="bp_diastolic" placeholder="Blood Pressure - Lower (eg: 80)" required>
+
+    <textarea name="address" placeholder="Address"></textarea>
+    <textarea name="medical_history" placeholder="Past Diseases / Health Problems"></textarea>
+    <textarea name="eye_history" placeholder="Eye History / Problems"></textarea>
+    <textarea name="family_eye_history" placeholder="Family Eye Problems"></textarea>
+
+    <button class="btn">Save Profile</button>
+
+  </form>
+</div>
+
+{% endblock %}

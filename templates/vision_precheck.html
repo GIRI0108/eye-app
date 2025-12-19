@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card precheck-card">
+
+  <h2 class="title">👁 Vision Pre-Check</h2>
+  <p class="subtitle">
+    Please complete the checklist before starting the vision test
+  </p>
+
+  <form method="POST">
+
+    <div class="check-item fade-delay-1">
+      <label class="checkbox">
+        <input type="checkbox" required>
+        <span></span>
+        I am in a well-lit environment
+      </label>
+    </div>
+
+    <div class="check-item fade-delay-2">
+      <label class="checkbox">
+        <input type="checkbox" required>
+        <span></span>
+        I am wearing my usual glasses / lenses (if any)
+      </label>
+    </div>
+
+    <div class="check-item fade-delay-3">
+      <label class="checkbox">
+        <input type="checkbox" required>
+        <span></span>
+        I am sitting comfortably at arm’s length
+      </label>
+    </div>
+
+    <div class="check-item fade-delay-4">
+      <label class="checkbox">
+        <input type="checkbox" required>
+        <span></span>
+        I understand this is not a medical diagnosis
+      </label>
+    </div>
+
+    <button type="submit" class="btn pulse">
+      Proceed to User Details →
+    </button>
+
+  </form>
+
+</div>
+
+{% endblock %}

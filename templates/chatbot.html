@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card" style="max-width:700px;margin:auto;">
+  <h2>AI Eye Assistant</h2>
+
+  <form method="post">
+    <textarea name="question" rows="5" placeholder="Ask any eye related question..." required></textarea>
+    <button class="btn">Ask AI</button>
+  </form>
+
+  {% if answer %}
+    <div class="card">
+      <h3>AI Response</h3>
+      <p>{{ answer }}</p>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

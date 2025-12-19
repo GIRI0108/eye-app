@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width:920px;margin:auto;">
+  <h2>Vision Quiz — Question {{ index }} / {{ total }}</h2>
+
+  <div id="qArea">
+    <div id="prompt">{{ q.prompt or "Observe the image and choose the correct option." }}</div>
+
+    <div style="margin-top:12px;">
+      <img id="qImage" src="{{ url_for('static', filename='games/' + q.image) }}" class="preview" style="max-width:420px;">
+    </div>
+
+    <div id="choices" style="margin-top:14px;">
+      {% for opt in [q.option1, q.option2, q.option3, q.option4] %}
+        <div style="margin:8px 0;">
+          <label style="display:block; background:#f6fbff; padding:12px; border-radius:10px;">
+            <input type="radio" name="choice" value="{{ opt }}"> {{ opt }}
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div style="margin-top:18px;">
+      <button class="btn" onclick="prevQ()" id="prevBtn">Previous</button>
+      <button class="btn" onclick="saveAndNext()">Next</button>
+      <button class="btn" id="finishBtn" onclick="finishQuiz()" style="display:none; background:linear-gradient(90deg,#28c76f,#16a34a)">Finish</button>
+    </div>
+
+    <div style="margin-top:10px;color:#666"><small>Answers stored locally. You may navigate back and change answers before finishing.</small></div>
+  </div>
+</div>
+
+<script>
+let current = {{ index -1 }};
+const total = {{ total }};
+
+function getSelected(){
+  const r = document.querySelector('input[name="choice"]:checked');
+  return r ? r.value : "";
+}
+
+function saveAnswer(idx, advance=false){
+  const ans = getSelected();
+  fetch("/vision_quiz/api/answer", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({index: idx, answer: ans, advance: advance})
+  }).then(res => res.json());
+}
+
+function loadQuestion(idx){
+  fetch(`/vision_quiz/api/question/${idx}`)
+    .then(r => r.json())
+    .then(q => {
+      document.getElementById('prompt').innerText = q.prompt || "Observe the image and choose an option.";
+      document.getElementById('qImage').src = q.image;
+      const choices = document.getElementById('choices');
+      choices.innerHTML = "";
+      q.options.forEach(opt=>{
+        choices.insertAdjacentHTML('beforeend', `<div style="margin:8px 0;"><label style="display:block; background:#f6fbff; padding:12px; border-radius:10px;"><input type="radio" name="choice" value="${opt}"> ${opt}</label></div>`);
+      });
+      document.getElementById('prevBtn').style.display = idx===0 ? 'none' : 'inline-block';
+      document.getElementById('finishBtn').style.display = idx===total-1 ? 'inline-block' : 'none';
+      current = idx;
+    });
+}
+
+function saveAndNext(){
+  saveAnswer(current, true);
+  if(current < total-1) loadQuestion(current+1);
+}
+
+function prevQ(){
+  saveAnswer(current, false);
+  if(current > 0) loadQuestion(current-1);
+}
+
+function finishQuiz(){
+  saveAnswer(current, false);
+  fetch("/vision_quiz/finish", {method:"POST"})
+    .then(resp => resp.text())
+    .then(html=>{
+      document.open(); document.write(html); document.close();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', ()=> {
+  if(current===0) document.getElementById('prevBtn').style.display='none';
+});
+</script>
+{% endblock %}

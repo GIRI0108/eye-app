@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card" style="max-width:900px;margin:auto;">
+  <h2>AI Medical Report</h2>
+
+  <img src="/{{ doc.filepath }}" class="preview">
+
+  <!-- Clean scrollable report box -->
+  <div class="report-box">
+    {{ doc.ai_result.model_response }}
+  </div>
+
+  <a href="/report/pdf/{{ doc._id }}" class="btn">Download PDF</a>
+</div>
+
+{% endblock %}

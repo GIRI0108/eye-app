@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Eye Health</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Animated background blobs -->
+<div class="bg-blobs"></div>
+
+<div class="container">
+
+  <!-- Animated glass navbar -->
+  <div class="glass-nav slide-down">
+    <h3>👁 VISION CARE</h3>
+
+    <div class="nav-links">
+      {% if session.get('username') %}
+        <a href="/logout">Logout</a>
+      {% else %}
+        <a href="/login">Login</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Page content -->
+  <div class="fade-in">
+    {% block content %}{% endblock %}
+  </div>
+
+</div>
+
+</body>
+</html>

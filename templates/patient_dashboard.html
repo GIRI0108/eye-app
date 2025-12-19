@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h2>Welcome {{ username }}</h2>
+
+  <div style="text-align:right;margin-bottom:15px;">
+    <a href="/edit_profile" class="btn">✏️ Edit Profile</a>
+  </div>
+
+  <div class="grid">
+
+    <div class="icon-box">
+      <h3>👁 Eye Scan</h3>
+      <a href="/upload" class="btn">Start Scan</a>
+    </div>
+
+    <!-- ✅ Vision Test REMOVED completely -->
+
+    <div class="icon-box">
+      <h3>⚠️ Vision Risk Test</h3>
+      <a href="/vision/ready" class="btn">Start Risk Test</a>
+    </div>
+
+    <div class="icon-box">
+      <h3>💬 AI Chatbot</h3>
+      <a href="/chatbot" class="btn">Open Chat</a>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <h2>📊 Your Health Insights</h2>
+
+  {% if profile %}
+    <p><b>🩺 Blood Pressure:</b> 
+      {{ profile.bp_systolic }}/{{ profile.bp_diastolic }}
+    </p>
+  {% endif %}
+
+  {% if images and images|length > 0 %}
+    <div class="grid">
+      {% for img in images %}
+        <div class="icon-box" style="position:relative;">
+
+          <!-- Delete Button -->
+          <form method="POST" action="/delete_scan/{{ img._id }}" 
+                style="position:absolute;top:10px;right:10px;">
+            <button type="submit" style="
+              background:red;
+              color:white;
+              border:none;
+              border-radius:50%;
+              width:35px;
+              height:35px;
+              font-size:16px;
+              cursor:pointer;
+            ">✖</button>
+          </form>
+
+          <img src="/{{ img.filepath }}" class="preview">
+          <p><b>Date:</b> {{ img.created_at }}</p>
+          <span class="badge">AI Scan Done</span>
+
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No scans found.</p>
+  {% endif %}
+
+</div>
+
+{% endblock %}

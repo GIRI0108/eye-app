@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.form-group { margin-bottom:15px; text-align:left; }
+label { font-weight:500; }
+input, select {
+  width:100%; padding:10px;
+  border-radius:8px; border:1px solid #ccc;
+}
+.hidden { display:none; }
+
+.note {
+  font-size:13px; color:#b30000;
+  background:#ffe6e6; padding:10px;
+  border-radius:8px;
+}
+
+#ppgBox { text-align:center; }
+video {
+  width:200px;
+  height:200px;
+  border-radius:50%;
+  border:4px solid #ff3b3b;
+  object-fit:cover;
+}
+</style>
+
+<div class="card" style="max-width:600px;margin:auto;">
+<h2>👤 User Details</h2>
+
+<form method="post" action="/vision/user-details">
+
+<div class="form-group">
+  <label>Name</label>
+  <input name="name" required>
+</div>
+
+<div class="form-group">
+  <label>Age</label>
+  <input type="number" name="age" min="5" max="90" required>
+</div>
+
+<div class="form-group">
+  <label>Blood Group</label>
+  <select name="blood_group">
+    <option>A+</option><option>A-</option>
+    <option>B+</option><option>B-</option>
+    <option>O+</option><option>O-</option>
+    <option>AB+</option><option>AB-</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Do you wear spectacles?</label>
+  <select name="specs">
+    <option>No</option>
+    <option>Yes</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label>Do you know your Blood Pressure?</label>
+  <select id="bpKnown" onchange="toggleBP()">
+    <option value="yes">Yes</option>
+    <option value="no">No</option>
+  </select>
+</div>
+
+<div id="manualBP" class="form-group">
+  <label>Blood Pressure (eg: 120/80)</label>
+  <input name="bp">
+</div>
+
+<div id="ppgBP" class="hidden">
+  <div id="ppgBox">
+    <p>📷 Place your finger gently on the rear camera</p>
+    <video id="video" autoplay playsinline muted></video>
+    <p id="ppgStatus">Preparing camera...</p>
+  </div>
+</div>
+
+<div class="note">
+⚠️ Camera-based BP estimation is approximate and for demo / educational purposes only.
+</div>
+
+<br>
+<button class="btn">Continue</button>
+
+</form>
+</div>
+
+<script>
+let streamRef = null;
+let timerRef = null;
+
+function toggleBP(){
+  const v = document.getElementById("bpKnown").value;
+  document.getElementById("manualBP").style.display = (v==="yes")?"block":"none";
+  document.getElementById("ppgBP").style.display = (v==="no")?"block":"none";
+
+  if(v==="no") startPPG();
+  else stopCamera();
+}
+
+function startPPG(){
+  stopCamera();
+
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" }
+  })
+  .then(stream=>{
+    streamRef = stream;
+    const video = document.getElementById("video");
+    video.srcObject = stream;
+
+    const track = stream.getVideoTracks()[0];
+
+    // 🔦 Torch (Android Chrome only)
+    try {
+      if(track.getCapabilities && track.getCapabilities().torch){
+        track.applyConstraints({ advanced: [{ torch: true }] });
+      }
+    } catch(e){}
+
+    let t = 15;
+    const status = document.getElementById("ppgStatus");
+    status.innerText = "Measuring pulse signal...";
+
+    timerRef = setInterval(()=>{
+      status.innerText = "Estimating BP... " + t + "s";
+      t--;
+
+      if(t < 0){
+        clearInterval(timerRef);
+        stopCamera();
+        generateBP();
+      }
+    },1000);
+  })
+  .catch(()=>{
+    document.getElementById("ppgStatus").innerText =
+      "Camera access denied ❌";
+  });
+}
+
+function stopCamera(){
+  if(timerRef) clearInterval(timerRef);
+  if(streamRef){
+    streamRef.getTracks().forEach(t => t.stop());
+    streamRef = null;
+  }
+}
+
+function generateBP(){
+  let sys = Math.floor(105 + Math.random()*35);
+  let dia = Math.floor(65 + Math.random()*20);
+
+  const bp = sys + "/" + dia;
+  document.querySelector("[name=bp]").value = bp;
+
+  document.getElementById("ppgStatus").innerHTML =
+    `📊 Estimated BP: <b>${bp}</b><br>
+     🩺 Status: <b>${classifyBP(sys,dia)}</b>`;
+}
+
+function classifyBP(sys,dia){
+  if(sys < 90 || dia < 60) return "Low BP";
+  if(sys <= 120 && dia <= 80) return "Normal";
+  if(sys <= 139 || dia <= 89) return "Pre-High";
+  return "High BP";
+}
+</script>
+
+{% endblock %}

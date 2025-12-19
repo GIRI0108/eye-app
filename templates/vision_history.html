@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width:920px;margin:auto;">
+  <h2>Your Vision History (last 10)</h2>
+  <canvas id="historyChart" width="800" height="300"></canvas>
+  <div style="margin-top:12px;">
+    <a href="/patient" class="btn">Back</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const data = {{ history|tojson }};
+const labels = data.map(d => new Date(d.created_at).toLocaleString());
+const scores = data.map(d => d.score);
+const risks = data.map(d => d.risk_pct);
+
+const ctx = document.getElementById('historyChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      { label: 'Score (%)', data: scores, borderWidth:2, fill:false },
+      { label: 'Risk (%)', data: risks, borderWidth:2, fill:false }
+    ]
+  },
+  options: {
+    responsive: true,
+    scales: { y: { beginAtZero:true, max:100 } }
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Validate Report</h2>
+<img src="/{{ doc.filepath }}" width="300"><br>
+<form method="post">
+  <label>Corrected result (if any)</label><br>
+  <textarea name="corrected"></textarea><br>
+  <label>Notes</label><br>
+  <textarea name="notes"></textarea><br>
+  <button type="submit">Save</button>
+</form>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.video-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: auto;
+}
+
+video {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  border: 5px solid #0072ff;
+  object-fit: cover;
+}
+
+.scan {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  border: 2px dashed #0072ff;
+  animation: scan 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  0% { transform: scale(1); opacity: .3; }
+  50% { transform: scale(1.05); opacity: .8; }
+  100% { transform: scale(1); opacity: .3; }
+}
+</style>
+
+<div style="text-align:center;">
+  <h2>🙂 Face Scan</h2>
+  <p>Please align your face inside the circle</p>
+
+  <div class="video-wrap">
+    <video id="video" autoplay playsinline muted></video>
+    <div class="scan"></div>
+  </div>
+
+  <p id="status">Scanning...</p>
+</div>
+
+<script>
+let stream = null;
+const video = document.getElementById("video");
+const statusText = document.getElementById("status");
+
+navigator.mediaDevices.getUserMedia({
+  video: {
+    facingMode: "user"
+  }
+})
+.then(s => {
+  stream = s;
+  video.srcObject = stream;
+
+  // fake scan animation time
+  setTimeout(() => {
+    statusText.innerText = "Face captured successfully ✅";
+
+    // stop camera
+    stream.getTracks().forEach(t => t.stop());
+
+    // go next
+    setTimeout(() => {
+      window.location.href = "/vision/precheck";
+    }, 1500);
+
+  }, 3000);
+})
+.catch(() => {
+  statusText.innerText = "Camera permission denied ❌";
+});
+</script>
+
+{% endblock %}

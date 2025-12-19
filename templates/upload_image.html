@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card" style="max-width:750px;margin:auto;">
+  <h2>Eye Scan</h2>
+
+  <!-- Live Camera Section -->
+  <div class="camera-box">
+    <video id="video" width="100%" autoplay></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+  </div>
+
+  <div class="center-btn">
+    <button type="button" class="btn" onclick="capture()">📸 Capture From Camera</button>
+  </div>
+
+  <hr style="margin:20px 0;">
+
+  <!-- Upload Section -->
+  <h3 style="text-align:center;">OR Upload from Gallery</h3>
+
+  <form id="imageForm" method="POST" enctype="multipart/form-data">
+    <input type="file" id="fileInput" name="eye_image" accept="image/*" required>
+
+    <div class="center-btn">
+      <button type="submit" class="btn">🧠 Analyze Eye</button>
+    </div>
+  </form>
+
+</div>
+
+<script>
+let stream = null;
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const fileInput = document.getElementById('fileInput');
+
+/* OPEN CAMERA */
+function startCamera() {
+  navigator.mediaDevices.getUserMedia({
+    video: {
+      facingMode: { ideal: "environment" } // rear camera
+    }
+  })
+  .then(s => {
+    stream = s;
+    video.srcObject = stream;
+    video.style.display = "block";
+  })
+  .catch(err => {
+    alert("Camera access denied ❌");
+  });
+}
+
+/* STOP CAMERA */
+function stopCamera() {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    video.srcObject = null;
+    video.style.display = "none";
+  }
+}
+
+/* CAPTURE IMAGE */
+function capture() {
+  if (!stream) {
+    alert("Please open camera first 📷");
+    return;
+  }
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+
+  canvas.toBlob(blob => {
+    const file = new File([blob], "eye_scan.jpg", { type: "image/jpeg" });
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+
+    alert("✅ Image captured. Click Analyze Eye");
+    stopCamera();
+  }, "image/jpeg");
+}
+</script>
+
+
+{% endblock %}
