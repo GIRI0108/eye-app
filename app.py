@@ -24,9 +24,6 @@ openai.api_key = OPENAI_API_KEY
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/")
 SECRET_KEY = os.getenv("SECRET_KEY", "change_this_in_prod")
 
-# OpenAI client
-client = OpenAI(api_key=OPENAI_API_KEY)
-
 # Flask app
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
@@ -717,4 +714,5 @@ def api_upload():
 # -------------------- Run --------------------
 if __name__ == "__main__":
     app.run(debug=True)
+
 
